@@ -1,13 +1,20 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
 
 setup(
     name='pyghthouse',
     version='0.1.0',
-    packages=['pyghthouse'],
-    url='',
-    license='',
+    packages=find_packages(where='pyghthouse'),
+    url='https://github.com/Musicted/pyghthouse',
+    license='MIT',
     author='Gavin Lüdemann',
     author_email='gavin.luedemann@gmail.com',
     description='Python Lighthouse adapter',
-    install_requires=['numpy~=1.21.2', 'websocket-client~=1.2.1', 'msgpack~=1.0.2']
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    install_requires=['numpy~=1.21.2', 'websocket-client~=1.2.1', 'msgpack~=1.0.2'],
+    package_dir={"": "pyghthouse", "utils": "pyghthouse/utils"},
+    python_requires=">=3.8"
 )

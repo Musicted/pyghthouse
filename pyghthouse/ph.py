@@ -94,6 +94,7 @@ class Pyghthouse:
     The following example creates a Pyghthouse and sets the 10th window of the 11th floor to orange.
     >>> from pyghthouse import Pyghthouse
     >>> p = Pyghthouse("YourUsername", "YourToken")
+    >>> p.start() # npt necessary to set image, but necessary for sending.
     >>> img = Pyghthouse.empty_image()
     >>> img[3, 9] = [255, 127, 0]
     >>> p.set_image(img)
@@ -134,6 +135,8 @@ class Pyghthouse:
     >>>             y += 1
     >>>     x = clip(x, 0, 27)
     >>>     y = clip(y, 0, 13)
+
+    There are more code examples in the git repository (https://github.com/Musicted/pyghthouse).
     """
 
     class PHMessageHandler:
