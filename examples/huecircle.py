@@ -1,5 +1,5 @@
 from pyghthouse import Pyghthouse
-from pyghthouse.utils._color import from_hsv
+from pyghthouse.utils import from_hsv
 from config import UNAME, TOKEN
 import numpy as np
 

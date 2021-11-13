@@ -3,7 +3,7 @@ from random import random
 import numpy as np
 from PIL import Image, ImageDraw
 
-from pyghthouse.utils._color import from_hsv
+from pyghthouse.utils import from_hsv
 from pyghthouse import Pyghthouse
 
 from config import UNAME, TOKEN
