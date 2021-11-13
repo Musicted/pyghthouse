@@ -5,8 +5,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyghthouse',
-    version='0.1.0',
-    packages=find_packages(where='pyghthouse'),
+    version='0.2.0',
+    packages=find_packages(where='.'),
     url='https://github.com/Musicted/pyghthouse',
     license='MIT',
     author='Gavin Lüdemann',
@@ -15,6 +15,6 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=['numpy~=1.21.2', 'websocket-client~=1.2.1', 'msgpack~=1.0.2'],
-    package_dir={"": "pyghthouse", "utils": "pyghthouse/utils"},
+    package_dir={"": ".", "utils": "./utils"},
     python_requires=">=3.8"
 )
