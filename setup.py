@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyghthouse',
-    version='0.2.0',
+    version='0.2.1',
     packages=find_packages(where='.'),
     url='https://github.com/Musicted/pyghthouse',
     license='MIT',

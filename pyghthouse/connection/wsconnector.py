@@ -1,6 +1,7 @@
 from threading import Thread, Lock
 from websocket import WebSocketApp, setdefaulttimeout, ABNF
 from msgpack import packb, unpackb
+from ssl import CERT_NONE
 
 
 class WSConnector:
@@ -17,7 +18,7 @@ class WSConnector:
         def __iter__(self):
             return self
 
-    def __init__(self, username: str, token: str, address: str, on_msg=None):
+    def __init__(self, username: str, token: str, address: str, on_msg=None, ignore_ssl_cert=False):
         self.username = username
         self.token = token
         self.address = address
@@ -26,6 +27,7 @@ class WSConnector:
         self.lock = Lock()
         self.reid = self.REID()
         self.running = False
+        self.ignore_ssl_cert = ignore_ssl_cert
         setdefaulttimeout(60)
 
     def send(self, data):
@@ -38,7 +40,8 @@ class WSConnector:
                                on_message=None if self.on_msg is None else self._handle_msg,
                                on_open=self._ready, on_error=self._fail)
         self.lock.acquire()
-        Thread(target=self.ws.run_forever).start()
+        kwargs = {"sslopt": {"cert_reqs": CERT_NONE}} if self.ignore_ssl_cert else None
+        Thread(target=self.ws.run_forever, kwargs=kwargs).start()
 
     def _fail(self, ws, err):
         self.lock.release()

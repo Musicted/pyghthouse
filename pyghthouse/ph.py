@@ -186,7 +186,8 @@ class Pyghthouse:
                     self.parent.connector.send(self.parent.canvas.get_image_bytes())
 
     def __init__(self, username: str, token: str, address: str = "wss://lighthouse.uni-kiel.de/websocket",
-                 frame_rate: float = 30.0, image_callback=None, verbosity=VerbosityLevel.WARN_ONCE):
+                 frame_rate: float = 30.0, image_callback=None, verbosity=VerbosityLevel.WARN_ONCE,
+                 ignore_ssl_cert=False):
         if frame_rate > 60.0 or frame_rate <= 0:
             raise ValueError("Frame rate must be greater than 0 and at most 60.")
         self.username = username
@@ -196,7 +197,8 @@ class Pyghthouse:
         self.image_callback = image_callback
         self.canvas = PyghthouseCanvas()
         self.msg_handler = self.PHMessageHandler(verbosity)
-        self.connector = WSConnector(username, token, address, on_msg=self.msg_handler.handle)
+        self.connector = WSConnector(username, token, address, on_msg=self.msg_handler.handle,
+                                     ignore_ssl_cert=ignore_ssl_cert)
         self.config_lock = Lock()
         self.ph_thread = None
         signal(SIGINT, self._handle_sigint)
