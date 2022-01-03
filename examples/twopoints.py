@@ -47,7 +47,7 @@ class ImageMaker:
         self.draw = ImageDraw.Draw(self.img)
         self.hue = 0.0
 
-    def callback(self):
+    def callback(self, events):
         self.p1.update()
         self.p2.update()
         self.hue += COLOR_SPEED

@@ -24,11 +24,11 @@ def circle_generator():
 circle = circle_generator()
 
 
-def callback():
+def callback(*args, **kwargs):
     return next(circle)
 
 
 if __name__ == '__main__':
-    p = Pyghthouse(UNAME, TOKEN, image_callback=callback)
+    p = Pyghthouse(UNAME, TOKEN, image_callback=callback, ignore_ssl_cert=True)
     print("Starting... use CTRL+C to stop.")
     p.start()

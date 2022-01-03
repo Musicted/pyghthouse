@@ -22,7 +22,12 @@ def image_gen():
 
 g = image_gen()
 
+
+def callback(*args, **kwargs):
+    return next(g)
+
+
 if __name__ == '__main__':
-    p = Pyghthouse(UNAME, TOKEN, image_callback=g.__next__, frame_rate=60)
+    p = Pyghthouse(UNAME, TOKEN, image_callback=callback, frame_rate=60)
     print("Starting... use CTRL+C to stop.")
     p.start()

@@ -18,7 +18,7 @@ class WSConnector:
         def __iter__(self):
             return self
 
-    def __init__(self, username: str, token: str, address: str, on_msg=None, ignore_ssl_cert=False):
+    def __init__(self, username: str, token: str, address: str, on_msg=None, ignore_ssl_cert=False, stream=False):
         self.username = username
         self.token = token
         self.address = address
@@ -28,6 +28,7 @@ class WSConnector:
         self.reid = self.REID()
         self.running = False
         self.ignore_ssl_cert = ignore_ssl_cert
+        self.stream = stream
         setdefaulttimeout(60)
 
     def send(self, data):
@@ -59,6 +60,16 @@ class WSConnector:
         print(f"Connected to {self.address}.")
         self.running = True
         self.lock.release()
+        if self.stream:
+            packet_start_stream = {
+                'REID': next(self.reid),
+                'AUTH': {'USER': self.username, 'TOKEN': self.token},
+                'VERB': 'STREAM',
+                'PATH': ['user', self.username, 'model'],
+                'META': {},
+                'PAYL': {}
+            }
+            self.ws.send(packb(packet_start_stream, use_bin_type=True), opcode=ABNF.OPCODE_BINARY)
 
     def _handle_msg(self, ws, msg):
         if isinstance(msg, bytes):
