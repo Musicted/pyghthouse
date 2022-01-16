@@ -12,7 +12,7 @@ def rainbow_generator():
 rainbow = rainbow_generator()
 
 
-def callback():
+def callback(*args, **kwargs):
     return next(rainbow)
 
 

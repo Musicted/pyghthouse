@@ -7,6 +7,7 @@ import numpy as np
 
 from pyghthouse.data.canvas import PyghthouseCanvas
 from pyghthouse.connection.wsconnector import WSConnector
+from pyghthouse.event.event_manager import EventManager
 
 
 class VerbosityLevel(Enum):
@@ -43,9 +44,9 @@ class Pyghthouse:
         Rate in 1/sec at which frames (images) are automatically sent to the lighthouse server. Also determines how
         often the image_callback function is called.
 
-    image_callback: function (optional)
-        A function that takes no arguments and generates a valid lighthouse image (cf Image Format). If set, this
-        function is called before an image is sent and is used to determine said image.
+    image_callback: function List[Event] -> image (optional)
+        A function that takes an argument 'events' and generates a valid lighthouse image (cf Image Format). If set,
+        this function is called before an image is sent and is used to determine said image.
         The function is guaranteed to be called frame_rate times each second *unless* its execution takes longer than
         1/frame_rate seconds, in which case execution will be slowed down accordingly.
 
@@ -60,6 +61,10 @@ class Pyghthouse:
             Print all warnings.
         pyghthouse.VerbosityLevel.ALL:
             Print all messages.
+
+    stream_remote_inputs: bool (optional, default: False)
+        Stream key events from the server. These can be retrieved via the get_event() or get_all_events()
+        methods and are passed to the callback method (if one exists).
 
     Image Format
     ------------
@@ -141,9 +146,10 @@ class Pyghthouse:
 
     class PHMessageHandler:
 
-        def __init__(self, verbosity=VerbosityLevel.WARN_ONCE):
+        def __init__(self, verbosity=VerbosityLevel.WARN_ONCE, event_manager=None):
             self.verbosity = verbosity
             self.warned_already = False
+            self.event_manager: EventManager = event_manager
 
         def reset(self):
             self.warned_already = False
@@ -152,6 +158,16 @@ class Pyghthouse:
             if msg['RNUM'] == 200:
                 if self.verbosity == VerbosityLevel.ALL:
                     print(msg)
+                payload = msg['PAYL']
+                if isinstance(payload, dict):
+                    try:
+                        key = payload['key']
+                        down = payload['dwn']
+                        if self.event_manager is not None:
+                            self.event_manager.add_key_event(key, down)
+                    except KeyError:
+                        pass
+
             elif self.verbosity == VerbosityLevel.WARN:
                 self.print_warning(msg)
             elif self.verbosity == VerbosityLevel.WARN_ONCE and not self.warned_already:
@@ -181,13 +197,13 @@ class Pyghthouse:
                     sleep_time = self.parent.send_interval - (time() % self.parent.send_interval)
                     sleep(sleep_time)
                     if self.parent.image_callback is not None:
-                        image_from_callback = self.parent.image_callback()
+                        image_from_callback = self.parent.image_callback(events=self.parent.get_all_events())
                         self.parent.set_image(image_from_callback)
                     self.parent.connector.send(self.parent.canvas.get_image_bytes())
 
     def __init__(self, username: str, token: str, address: str = "wss://lighthouse.uni-kiel.de/websocket",
                  frame_rate: float = 30.0, image_callback=None, verbosity=VerbosityLevel.WARN_ONCE,
-                 ignore_ssl_cert=False):
+                 ignore_ssl_cert=False, stream_remote_inputs=False):
         if frame_rate > 60.0 or frame_rate <= 0:
             raise ValueError("Frame rate must be greater than 0 and at most 60.")
         self.username = username
@@ -196,11 +212,13 @@ class Pyghthouse:
         self.send_interval = 1.0 / frame_rate
         self.image_callback = image_callback
         self.canvas = PyghthouseCanvas()
-        self.msg_handler = self.PHMessageHandler(verbosity)
+        self.event_manager = EventManager()
+        self.msg_handler = self.PHMessageHandler(verbosity, self.event_manager)
         self.connector = WSConnector(username, token, address, on_msg=self.msg_handler.handle,
-                                     ignore_ssl_cert=ignore_ssl_cert)
+                                     ignore_ssl_cert=ignore_ssl_cert, stream=stream_remote_inputs)
         self.config_lock = Lock()
         self.ph_thread = None
+
         signal(SIGINT, self._handle_sigint)
 
     def connect(self):
@@ -253,3 +271,9 @@ class Pyghthouse:
     def _handle_sigint(self, sig, frame):
         self.close()
         raise SystemExit(0)
+
+    def get_event(self):
+        return self.event_manager.get_event()
+
+    def get_all_events(self):
+        return self.event_manager.get_all_events()
