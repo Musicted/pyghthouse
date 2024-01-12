@@ -160,7 +160,7 @@ class Pyghthouse:
 
         @staticmethod
         def print_warning(msg):
-            print(f"Warning: {msg['RNUM']} {msg['RESPONSE']} {', '.join(msg['WARNIGS'])}")
+            print(f"Warning: {msg['RNUM']} {msg['RESPONSE']} {', '.join(msg['WARNINGS'])}")
 
     class PHThread(Thread):
 
